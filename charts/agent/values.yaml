@@ -32,6 +32,7 @@ agent:
   apiKeySecret:
     create: true
     apiKey: ""
+  terminationGracePeriodSeconds: # default 300
 
 # This is for setting Kubernetes Annotations to a Pod.
 # For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/

@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "agent.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "agent.labels" . | nindent 4 }}
 spec:
@@ -29,6 +30,8 @@ spec:
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      shareProcessNamespace: false
+      terminationGracePeriodSeconds: {{ .Values.agent.terminationGracePeriodSeconds | default 300 }}
       containers:
         - name: {{ .Chart.Name }}
           {{- with .Values.securityContext }}
