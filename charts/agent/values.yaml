@@ -17,22 +17,29 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
-agent:
-  # -- Configures secret for agent API Key
-  #
-  # -- If you already have a secret with the Key, set `create` to
-  # -- false and set the `name`` value to the name of your secret.
-  #
-  # -- If you don't have a secret, set `create` to true
-  # -- and set the `apiKey`` value to your Key.
-  #
-  # -- You can also create a secret yourself via extraManifests[].
-  # -- Set `create` to false and set `name` to the name of
-  # -- your secret defined in your extraManifests.
-  apiKeySecret:
-    create: true
-    apiKey: ""
-  terminationGracePeriodSeconds: # default 300
+# Configures secret for agent API Key
+#
+# If you already have a secret with the Key, set `create` to
+# false and set the `name`` value to the name of your secret.
+#
+# If you don't have a secret, set `create` to true
+# and set the `apiKey`` value to your Key.
+#
+# You can also create a secret yourself via extraManifests[].
+# Set `create` to false and set `name` to the name of
+# your secret defined in your extraManifests.
+apiKeySecret:
+  create: true
+  apiKey: ""
+
+terminationGracePeriodSeconds: # default 300
+
+# Extra environment variables to be passed to agent pods
+#
+# env:
+#   MY_ENV_VAR: myvalue
+#   ANOTHER_VAR: anothervalue
+env: {}
 
 # This is for setting Kubernetes Annotations to a Pod.
 # For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/

@@ -31,7 +31,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       shareProcessNamespace: false
-      terminationGracePeriodSeconds: {{ .Values.agent.terminationGracePeriodSeconds | default 300 }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds | default 300 }}
       containers:
         - name: {{ .Chart.Name }}
           {{- with .Values.securityContext }}
@@ -41,14 +41,18 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
+            {{- range $key, $value := .Values.env }}
+            - name: "{{ tpl $key $ }}"
+              value: "{{ tpl (print $value) $ }}"
+            {{- end }}
             - name: "API_KEY"
               valueFrom:
                 secretKeyRef:
                   key: apiKey
-                  {{- if .Values.agent.apiKeySecret.create }}
+                  {{- if .Values.apiKeySecret.create }}
                   name: {{ .Release.Name }}-auth
-                  {{- else if and .Values.agent.apiKeySecret.name (not .Values.agent.apiKeySecret.create) }}
-                  name: {{ .Values.agent.apiKeySecret.name }}
+                  {{- else if and .Values.apiKeySecret.name (not .Values.apiKeySecret.create) }}
+                  name: {{ .Values.apiKeySecret.name }}
                   {{- end }}
           {{- with .Values.livenessProbe }}
           livenessProbe:
