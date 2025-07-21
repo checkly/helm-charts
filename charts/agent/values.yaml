@@ -32,6 +32,7 @@ agent:
   apiKeySecret:
     create: true
     apiKey: ""
+  terminationGracePeriodSeconds: # default 300
 
 # This is for setting Kubernetes Annotations to a Pod.
 # For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
@@ -43,16 +44,13 @@ podLabels: {}
 podSecurityContext: {}
   # fsGroup: 2000
 
-securityContext:
-  allowPrivilegeEscalation: false
-  capabilities:
-    drop:
-      - ALL
-  privileged: false
-  readOnlyRootFilesystem: false
-  runAsGroup: 10001
-  runAsNonRoot: true
-  runAsUser: 65532
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious

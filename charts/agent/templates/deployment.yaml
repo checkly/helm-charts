@@ -31,7 +31,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       shareProcessNamespace: false
-      terminationGracePeriodSeconds: 300
+      terminationGracePeriodSeconds: {{ .Values.agent.terminationGracePeriodSeconds | default 300 }}
       containers:
         - name: {{ .Chart.Name }}
           {{- with .Values.securityContext }}
