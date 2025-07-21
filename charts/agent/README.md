@@ -18,7 +18,7 @@ If you had already added this repo earlier, run `helm repo update` to retrieve t
 
 To install the agent chart:
 
-    helm upgrade --install my-agent checkly/agent --set agent.apiKeySecret.apiKey=pl_...
+    helm upgrade --install my-agent checkly/agent --set apiKeySecret.apiKey=pl_...
 
 To uninstall the chart:
 
@@ -28,22 +28,20 @@ See [https://github.com/checkly/helm-charts](https://github.com/checkly/helm-cha
 
 ## Alternative ways to set the agent API Key
 
-Instead of setting `agent.apiKeySecret.apiKey` you can also choose an existing secret with the following options
+Instead of setting `apiKeySecret.apiKey` you can also choose an existing secret with the following options
 
 ```
-agent:
-  apiKeySecret:
-    create: false
-    name: <NAME_OF_EXISTING_SECRET>
+apiKeySecret:
+  create: false
+  name: <NAME_OF_EXISTING_SECRET>
 ```
 
 or create the secret with `extraManifests`
 
 ```
-agent:
-  apiKeySecret:
-    create: false
-    name: checkly-agent-secret
+apiKeySecret:
+  create: false
+  name: checkly-agent-secret
 
 extraManifests:
   - apiVersion: external-secrets.io/v1beta1
