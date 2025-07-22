@@ -20,10 +20,10 @@ fullnameOverride: ""
 # Configures secret for agent API Key
 #
 # If you already have a secret with the Key, set `create` to
-# false and set the `name`` value to the name of your secret.
+# false and set the `name` and `key` of your secret.
 #
 # If you don't have a secret, set `create` to true
-# and set the `apiKey`` value to your Key.
+# and set the `apiKey` value to your Key.
 #
 # You can also create a secret yourself via extraManifests[].
 # Set `create` to false and set `name` to the name of

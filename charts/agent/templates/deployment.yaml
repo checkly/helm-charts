@@ -57,7 +57,7 @@ spec:
             - name: "API_KEY"
               valueFrom:
                 secretKeyRef:
-                  key: apiKey
+                  key: {{ .Values.apiKeySecret.key | default "apiKey" }}
                   {{- if .Values.apiKeySecret.create }}
                   name: {{ .Release.Name }}-auth
                   {{- else if and .Values.apiKeySecret.name (not .Values.apiKeySecret.create) }}
