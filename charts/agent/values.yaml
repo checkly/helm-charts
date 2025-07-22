@@ -41,17 +41,11 @@ terminationGracePeriodSeconds:
 # strategy:
 #   type: "RollingUpdate"
 #   rollingUpdate:
-#     maxSurge: 25%
-#     maxUnavailable: 25%
-#
-# recommended to always have enough capacity to run your checks
-# and replace agent pods one by one
-#
-# strategy:
-#   type: "RollingUpdate"
-#   rollingUpdate:
-#     maxSurge: 1
+#     maxSurge: 10%
 #     maxUnavailable: 0
+#
+# maxUnavailable of zero is recommended to always have enough
+# capacity to run your checks
 strategy: {}
 
 # Extra environment variables to be passed to agent pods
