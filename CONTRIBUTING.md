@@ -4,7 +4,7 @@ We are excited that you're interested in contributing to this project!
 
 ## Code of conduct
 
-This project adheres to a [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to support@checklyhq.com.
+This project adheres to a [Code of Conduct](https://github.com/checkly/helm-charts?tab=coc-ov-file). By participating, you are expected to uphold this code. Please report unacceptable behavior to support@checklyhq.com.
 
 ## Ways to contribute
 
@@ -28,9 +28,9 @@ By contributing, you confirm that you have the rights to your work and agree to 
 
 ## Example contribution workflow
 
-1. **Fork** this repo
-2. **Create a new branch** for your changes
-3. **Make your edits or improvements**
-4. **Commit** your changes with a short message
-5. **Open a pull request** and describe what you did
+1. Fork this repo
+2. Create a new branch for your changes
+3. Make your edits or improvements
+4. Commit your changes with a short message
+5. Open a pull request and describe what you did
 6. We’ll review and help if needed!
