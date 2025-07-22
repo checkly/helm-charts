@@ -32,7 +32,21 @@ apiKeySecret:
   create: true
   apiKey: ""
 
-terminationGracePeriodSeconds: # default 300
+# default 300
+terminationGracePeriodSeconds:
+
+# Update strategy for the deployment
+# default:
+#
+# strategy:
+#   type: "RollingUpdate"
+#   rollingUpdate:
+#     maxSurge: 10%
+#     maxUnavailable: 0
+#
+# maxUnavailable of zero is recommended to always have enough
+# capacity to run your checks
+strategy: {}
 
 # Extra environment variables to be passed to agent pods
 #
