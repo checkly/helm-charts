@@ -26,6 +26,24 @@ To uninstall the chart:
 
 See [https://github.com/checkly/helm-charts](https://github.com/checkly/helm-charts) for more info and available charts.
 
+## Using it with Terraform
+
+```
+resource "helm_release" "checkly_agent" {
+  name       = "checkly-agent"
+  repository = "https://checkly.github.io/helm-charts"
+  chart      = "agent"
+  version    = "0.3.0"
+
+  # https://github.com/checkly/helm-charts/blob/main/charts/agent/values.yaml
+  values = [
+    <<-EOT
+    # add your values.yaml conf here
+    EOT
+  ]
+}
+```
+
 ## Alternative ways to set the agent API Key
 
 Instead of setting `apiKeySecret.apiKey` you can also choose an existing secret with the following options
