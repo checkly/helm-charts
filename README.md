@@ -1,6 +1,6 @@
-# Checkly Helm Charts
-
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
+# Checkly Helm Charts
 
 ## Usage
 
@@ -12,10 +12,12 @@ Once Helm has been set up correctly, add the repo as follows:
 
 If you had already added this repo earlier, run `helm repo update` to retrieve the latest versions of the packages. You can then run `helm search repo checkly` to see all available charts.
 
-## Contributing
+## Documentation
+More information can be found in our developer docs: [Running Checkly on Kubernetes](https://www.checklyhq.com/docs/private-locations/running-on-kubernetes/#helm-chart).
 
-tbd
+## Contributing
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+Our project follows the [Contributor Covenant](https://github.com/checkly/helm-charts?tab=coc-ov-file).
 
 ## License
-
-[Apache 2.0 License](https://github.com/checkly/helm-charts/blob/main/LICENSE).
+This project is licensed under the [Apache 2.0 License](https://github.com/checkly/helm-charts/blob/main/LICENSE).
