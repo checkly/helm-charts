@@ -10,6 +10,15 @@ spec:
   selector:
     matchLabels:
       {{- include "agent.selectorLabels" . | nindent 6 }}
+  strategy:
+  {{- with .Values.strategy }}
+    {{- toYaml . | nindent 4 }}
+  {{- else }}
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 10%
+      maxUnavailable: 0
+  {{- end }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
