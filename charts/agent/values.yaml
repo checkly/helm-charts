@@ -17,6 +17,10 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
+# This is the configuration of the agent's internal metrics server
+metrics:
+  port: 8080
+
 # Configures secret for agent API Key
 #
 # If you already have a secret with the Key, set `create` to
