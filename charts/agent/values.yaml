@@ -17,7 +17,7 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
-# This is the configuration of the prometheus metrics server
+# This is the configuration of the agent's internal metrics server
 metrics:
   port: 8080
 
