@@ -110,4 +110,41 @@ nodeSelector: {}
 
 tolerations: []
 
+# https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
 affinity: {}
+# podAntiAffinity:
+#   requiredDuringSchedulingIgnoredDuringExecution:
+#     - labelSelector:
+#         matchExpressions:
+#           - key: app.kubernetes.io/name
+#             operator: In
+#             values:
+#               - agent
+#           - key: app.kubernetes.io/instance
+#             operator: In
+#             values:
+#               - RELEASE-NAME
+#       topologyKey: kubernetes.io/hostname
+
+# https://kubernetes.io/docs/tasks/run-application/configure-pdb/
+podDisruptionBudget:
+  enabled: false
+  # minAvailable: 1
+  # maxUnavailable: 1
+  # Only one of minAvailable or maxUnavailable can be set
+
+# https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+topologySpreadConstraints: []
+# Example configurations:
+# - maxSkew: 1
+#   topologyKey: topology.kubernetes.io/zone
+#   whenUnsatisfiable: DoNotSchedule
+#   labelSelector:
+#     matchLabels:
+#       app.kubernetes.io/name: agent
+# - maxSkew: 1
+#   topologyKey: kubernetes.io/hostname
+#   whenUnsatisfiable: ScheduleAnyway
+#   labelSelector:
+#     matchLabels:
+#       app.kubernetes.io/name: agent
