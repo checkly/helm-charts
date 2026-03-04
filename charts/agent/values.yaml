@@ -123,7 +123,7 @@ readinessProbe:
   periodSeconds: 10
   failureThreshold: 5
   successThreshold: 1
-  timeoutSeconds: 3
+  timeoutSeconds: 10
 
 # Additional volumes on the output Deployment definition.
 volumes: []
