@@ -50,13 +50,19 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-          - name: metrics
-            containerPort: {{ .Values.metrics.port }}
+            - name: health
+              containerPort: {{ .Values.healthPort }}
+              protocol: TCP
+            - name: metrics
+              containerPort: {{ .Values.metrics.port }}
+              protocol: TCP
           env:
             {{- range $key, $value := .Values.env }}
             - name: "{{ tpl $key $ }}"
               value: "{{ tpl (print $value) $ }}"
             {{- end }}
+            - name: "AGENT_HEALTH_PORT"
+              value: "{{ .Values.healthPort }}"
             - name: "API_KEY"
               valueFrom:
                 secretKeyRef:
@@ -66,6 +72,10 @@ spec:
                   {{- else if and .Values.apiKeySecret.name (not .Values.apiKeySecret.create) }}
                   name: {{ .Values.apiKeySecret.name }}
                   {{- end }}
+          {{- with .Values.startupProbe }}
+          startupProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           {{- with .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}

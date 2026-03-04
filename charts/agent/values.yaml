@@ -59,6 +59,10 @@ strategy: {}
 #   ANOTHER_VAR: anothervalue
 env: {}
 
+# Port where the agent exposes health endpoints (/-/readiness, /-/liveness, /health).
+# Automatically sets the AGENT_HEALTH_PORT environment variable.
+healthPort: 8081
+
 # This is for setting Kubernetes Annotations to a Pod.
 # For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
 podAnnotations: {}
@@ -89,9 +93,37 @@ resources: {}
   #   cpu: 100m
   #   memory: 128Mi
 
-# This is to setup the liveness and readiness probes more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
-livenessProbe: {}
-readinessProbe: {}
+# Health probes — the agent exposes endpoints on the health port (default 8081):
+#   /-/liveness  - Returns 200 OK if the process is alive
+#   /-/readiness - Returns 200 OK when connected to the Checkly API, 503 otherwise
+#   /health      - Returns 200 OK if the process is alive
+# Set any probe to null to disable it (e.g. startupProbe: null).
+# More information: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+startupProbe:
+  httpGet:
+    path: /-/readiness
+    port: health
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  failureThreshold: 12
+  timeoutSeconds: 3
+
+livenessProbe:
+  httpGet:
+    path: /-/liveness
+    port: health
+  periodSeconds: 30
+  failureThreshold: 3
+  timeoutSeconds: 5
+
+readinessProbe:
+  httpGet:
+    path: /-/readiness
+    port: health
+  periodSeconds: 10
+  failureThreshold: 3
+  successThreshold: 1
+  timeoutSeconds: 3
 
 # Additional volumes on the output Deployment definition.
 volumes: []

@@ -71,3 +71,14 @@ extraManifests:
       target:
         name: my-checkly-secret-in-aws
 ```
+
+## Health Probes
+
+The chart configures Kubernetes startup, liveness, and readiness probes by default using the agent's built-in health endpoints on port 8081. See `values.yaml` for the default probe settings.
+
+To disable probes, set them to `null`. To use a custom health port, set `healthPort`:
+
+```yaml
+healthPort: 9090        # default: 8081, automatically synced to AGENT_HEALTH_PORT env var
+startupProbe: null      # disable startup probe
+```
