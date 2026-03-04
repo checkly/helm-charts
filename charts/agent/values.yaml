@@ -121,7 +121,7 @@ readinessProbe:
     path: /-/readiness
     port: health
   periodSeconds: 10
-  failureThreshold: 3
+  failureThreshold: 5
   successThreshold: 1
   timeoutSeconds: 3
 
