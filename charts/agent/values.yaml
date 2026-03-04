@@ -114,7 +114,7 @@ livenessProbe:
     port: health
   periodSeconds: 30
   failureThreshold: 5
-  timeoutSeconds: 5
+  timeoutSeconds: 10
 
 readinessProbe:
   httpGet:
