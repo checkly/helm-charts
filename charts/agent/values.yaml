@@ -103,7 +103,7 @@ startupProbe:
   httpGet:
     path: /-/readiness
     port: health
-  initialDelaySeconds: 5
+  initialDelaySeconds: 1
   periodSeconds: 5
   failureThreshold: 12
   timeoutSeconds: 3
