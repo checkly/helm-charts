@@ -113,7 +113,7 @@ livenessProbe:
     path: /-/liveness
     port: health
   periodSeconds: 30
-  failureThreshold: 3
+  failureThreshold: 5
   timeoutSeconds: 5
 
 readinessProbe:
