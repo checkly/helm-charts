@@ -50,9 +50,6 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - name: health
-              containerPort: {{ .Values.healthPort }}
-              protocol: TCP
             - name: metrics
               containerPort: {{ .Values.metrics.port }}
               protocol: TCP
@@ -62,9 +59,9 @@ spec:
               value: "{{ tpl (print $value) $ }}"
             {{- end }}
             - name: "AGENT_SERVER_PORT"
-              value: "{{ .Values.healthPort }}"
+              value: "{{ .Values.metrics.port }}"
             - name: "AGENT_HEALTH_PORT"
-              value: "{{ .Values.healthPort }}"
+              value: "{{ .Values.metrics.port }}"
             - name: "API_KEY"
               valueFrom:
                 secretKeyRef:

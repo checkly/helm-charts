@@ -74,11 +74,10 @@ extraManifests:
 
 ## Health Probes
 
-The chart configures Kubernetes startup, liveness, and readiness probes by default using the agent's built-in health endpoints on port 8081. See `values.yaml` for the default probe settings.
+The chart configures Kubernetes startup, liveness, and readiness probes by default using the agent's built-in health endpoints on `metrics.port` (default 8080). See `values.yaml` for the default probe settings.
 
-To disable probes, set them to `null`. To use a custom health port, set `healthPort`:
+To disable probes, set them to `null`:
 
 ```yaml
-healthPort: 9090        # default: 8081, automatically synced to AGENT_HEALTH_PORT env var
-startupProbe: null      # disable startup probe
+startupProbe: null
 ```

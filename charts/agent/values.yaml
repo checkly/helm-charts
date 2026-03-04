@@ -17,7 +17,9 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
-# This is the configuration of the agent's internal metrics server
+# This is the configuration of the agent's internal server which serves
+# metrics (/metrics) and health endpoints (/-/readiness, /-/liveness, /health).
+# Automatically sets the AGENT_SERVER_PORT and AGENT_HEALTH_PORT environment variables.
 metrics:
   port: 8080
 
@@ -59,10 +61,6 @@ strategy: {}
 #   ANOTHER_VAR: anothervalue
 env: {}
 
-# Port where the agent exposes health endpoints (/-/readiness, /-/liveness, /health).
-# Automatically sets the AGENT_SERVER_PORT and AGENT_HEALTH_PORT environment variables.
-healthPort: 8080
-
 # This is for setting Kubernetes Annotations to a Pod.
 # For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
 podAnnotations: {}
@@ -93,7 +91,7 @@ resources: {}
   #   cpu: 100m
   #   memory: 128Mi
 
-# Health probes — the agent exposes endpoints on the health port (default 8081):
+# Health probes — the agent exposes endpoints on the metrics port (default 8080):
 #   /-/liveness  - Returns 200 OK if the process is alive
 #   /-/readiness - Returns 200 OK when connected to the Checkly API, 503 otherwise
 #   /health      - Returns 200 OK if the process is alive
@@ -102,7 +100,7 @@ resources: {}
 startupProbe:
   httpGet:
     path: /-/readiness
-    port: health
+    port: metrics
   initialDelaySeconds: 1
   periodSeconds: 2
   failureThreshold: 30
@@ -111,7 +109,7 @@ startupProbe:
 livenessProbe:
   httpGet:
     path: /-/liveness
-    port: health
+    port: metrics
   initialDelaySeconds: 5
   periodSeconds: 2
   timeoutSeconds: 3
@@ -121,7 +119,7 @@ livenessProbe:
 readinessProbe:
   httpGet:
     path: /-/readiness
-    port: health
+    port: metrics
   initialDelaySeconds: 5
   periodSeconds: 5
   failureThreshold: 2
