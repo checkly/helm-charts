@@ -71,3 +71,13 @@ extraManifests:
       target:
         name: my-checkly-secret-in-aws
 ```
+
+## Health Probes
+
+The chart configures Kubernetes startup, liveness, and readiness probes by default using the agent's built-in health endpoints on `metrics.port` (default 8080). See `values.yaml` for the default probe settings.
+
+To disable probes, set them to `null`:
+
+```yaml
+startupProbe: null
+```

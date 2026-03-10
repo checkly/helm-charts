@@ -17,7 +17,9 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
-# This is the configuration of the agent's internal metrics server
+# This is the configuration of the agent's internal server which serves
+# metrics (/metrics) and health endpoints (/-/readiness, /-/liveness, /health).
+# Automatically sets the AGENT_SERVER_PORT environment variable.
 metrics:
   port: 8080
 
@@ -89,9 +91,39 @@ resources: {}
   #   cpu: 100m
   #   memory: 128Mi
 
-# This is to setup the liveness and readiness probes more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
-livenessProbe: {}
-readinessProbe: {}
+# Health probes — the agent exposes endpoints on the metrics port (default 8080):
+#   /-/liveness  - Returns 200 OK if the process is alive
+#   /-/readiness - Returns 200 OK when connected to the Checkly API, 503 otherwise
+#   /health      - Returns 200 OK if the process is alive
+# Set any probe to null to disable it (e.g. startupProbe: null).
+# More information: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+startupProbe:
+  httpGet:
+    path: /-/readiness
+    port: metrics
+  initialDelaySeconds: 1
+  periodSeconds: 2
+  failureThreshold: 30
+  timeoutSeconds: 3
+
+livenessProbe:
+  httpGet:
+    path: /-/liveness
+    port: metrics
+  initialDelaySeconds: 5
+  periodSeconds: 2
+  timeoutSeconds: 3
+  failureThreshold: 60
+  successThreshold: 1
+
+readinessProbe:
+  httpGet:
+    path: /-/readiness
+    port: metrics
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  failureThreshold: 2
+  successThreshold: 1
 
 # Additional volumes on the output Deployment definition.
 volumes: []
