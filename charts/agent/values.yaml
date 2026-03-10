@@ -19,7 +19,7 @@ fullnameOverride: ""
 
 # This is the configuration of the agent's internal server which serves
 # metrics (/metrics) and health endpoints (/-/readiness, /-/liveness, /health).
-# Automatically sets the AGENT_SERVER_PORT and AGENT_HEALTH_PORT environment variables.
+# Automatically sets the AGENT_SERVER_PORT environment variable.
 metrics:
   port: 8080
 

@@ -60,8 +60,6 @@ spec:
             {{- end }}
             - name: "AGENT_SERVER_PORT"
               value: "{{ .Values.metrics.port }}"
-            - name: "AGENT_HEALTH_PORT"
-              value: "{{ .Values.metrics.port }}"
             - name: "API_KEY"
               valueFrom:
                 secretKeyRef:
