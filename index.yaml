@@ -2,6 +2,16 @@ apiVersion: v1
 entries:
   agent:
   - apiVersion: v2
+    appVersion: 8.3.3
+    created: "2026-06-17T14:17:27.824539203Z"
+    description: Checkly Agent
+    digest: bd8c11ed3ba40d23fbb4f54d6c4e5ba06a77a70e9372b8cbc654905475c34e71
+    name: agent
+    type: application
+    urls:
+    - https://github.com/checkly/helm-charts/releases/download/agent-0.7.2/agent-0.7.2.tgz
+    version: 0.7.2
+  - apiVersion: v2
     appVersion: 8.3.2
     created: "2026-06-15T12:56:54.376861969Z"
     description: Checkly Agent
@@ -161,4 +171,4 @@ entries:
     urls:
     - https://github.com/checkly/helm-charts/releases/download/agent-0.1.0/agent-0.1.0.tgz
     version: 0.1.0
-generated: "2026-06-15T12:56:54.376994939Z"
+generated: "2026-06-17T14:17:27.824696808Z"
