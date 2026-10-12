@@ -103,6 +103,21 @@ autoscaling:
     create: false
 ```
 
+### Adopt an existing ScaledObject
+
+Set `autoscaling.scaledObject.name` to the existing name. This changes only the ScaledObject name; the Deployment name and scaling target stay the same.
+
+```yaml
+autoscaling:
+  enabled: true
+  scaledObject:
+    name: checkly-agent-scaler
+```
+
+Provide the existing scaling settings and Prometheus configuration. Transfer ownership with `helm upgrade --take-ownership` (Helm 3.17 or later), or set the Helm ownership label and annotations before the upgrade. The existing ScaledObject and its HPA stay in place.
+
+For Terraform, use `helm_release.take_ownership = true` (Helm provider 3.1.0 or later). Remove the old manifest resource with a `removed` block and `lifecycle { destroy = false }`. Terraform then stops managing the manifest without deleting it.
+
 ## Alternative ways to set the agent API Key
 
 Instead of setting `apiKeySecret.apiKey` you can also choose an existing secret with the following options

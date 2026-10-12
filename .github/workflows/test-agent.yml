@@ -1,0 +1,28 @@
+name: Test agent chart
+
+on:
+  pull_request:
+    paths:
+      - 'charts/agent/**'
+      - 'tests/**'
+      - '.github/workflows/test-agent.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'charts/agent/**'
+      - 'tests/**'
+      - '.github/workflows/test-agent.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-helm@v5
+        with:
+          version: v3.22.0
+      - run: helm lint charts/agent
+      - run: python3 -m unittest discover -s tests
