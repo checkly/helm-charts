@@ -7,10 +7,10 @@ metadata:
   labels:
     {{- include "agent.labels" . | nindent 4 }}
 spec:
-  {{- if .Values.podDisruptionBudget.minAvailable }}
+  {{- if ne .Values.podDisruptionBudget.minAvailable nil }}
   minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
   {{- end }}
-  {{- if .Values.podDisruptionBudget.maxUnavailable }}
+  {{- if ne .Values.podDisruptionBudget.maxUnavailable nil }}
   maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable }}
   {{- end }}
   selector:

@@ -22,6 +22,20 @@ You can discover reported bugs, feature ideas, or discussion topics in the [Issu
 
 You can reach us anytime at support@checklyhq.com or join our [Community Slack](https://join.slack.com/t/checklycommunity/shared_invite/zt-2qc51mpyr-5idwVD4R4izkf5FC4CFk1A).
 
+## Test chart changes
+
+Install Helm 3.22.0 and Python 3.12. Run from the repository root:
+
+```sh
+python3 -m venv .venv
+.venv/bin/python -m pip install -r tests/requirements.txt
+helm lint charts/agent
+.venv/bin/python -m unittest discover -s tests -v
+```
+
+CI runs lint and render tests on every pull request. Render tests parse YAML,
+reject duplicate keys, and check resource fields and references.
+
 ## Legal
 
 By contributing, you confirm that you have the rights to your work and agree to license it under the [APACHE LICENSE, VERSION 2.0](LICENSE).

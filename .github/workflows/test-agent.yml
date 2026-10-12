@@ -2,10 +2,6 @@ name: Test agent chart
 
 on:
   pull_request:
-    paths:
-      - 'charts/agent/**'
-      - 'tests/**'
-      - '.github/workflows/test-agent.yml'
   push:
     branches: [main]
     paths:
@@ -24,5 +20,9 @@ jobs:
       - uses: azure/setup-helm@v5
         with:
           version: v3.22.0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python3 -m pip install -r tests/requirements.txt
       - run: helm lint charts/agent
       - run: python3 -m unittest discover -s tests
