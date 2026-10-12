@@ -4,7 +4,7 @@
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
-  name: {{ .Values.autoscaling.scaledObject.name | default (include "agent.fullname" .) | quote }}
+  name: {{ include "agent.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "agent.labels" . | nindent 4 }}

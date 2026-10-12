@@ -15,8 +15,6 @@ autoscaling:
     # Set to false if you manage your own ScaledObject or HPA for the agent Deployment.
     # The chart then only leaves spec.replicas unset, and the other autoscaling values are not used.
     create: true
-    # Override the ScaledObject name. Empty uses the Deployment name.
-    name: ""
   minReplicaCount: 2
   maxReplicaCount: 10
   # How often KEDA checks the trigger (KEDA default: 30). The metric is aggregated over ~1 minute.

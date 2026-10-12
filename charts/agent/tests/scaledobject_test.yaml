@@ -77,63 +77,9 @@ tests:
             value: 1
             periodSeconds: 60
     template: scaledobject.yaml
-- it: override scaler name and keep Deployment target
-  set:
-    autoscaling.scaledObject.name: ci-agent-scaler
-  asserts:
-  - equal:
-      path: metadata.name
-      value: ci-agent-scaler
-    template: scaledobject.yaml
-  - equal:
-      path: metadata.name
-      value: ci-agent
-    template: deployment.yaml
-  - equal:
-      path: spec.scaleTargetRef.name
-      value: ci-agent
-    template: scaledobject.yaml
-  - notExists:
-      path: spec.replicas
-    template: deployment.yaml
-- it: use Deployment name for empty scaler name
-  set:
-    autoscaling.scaledObject.name: ''
-    fullnameOverride: custom-agent
-  asserts:
-  - equal:
-      path: metadata.name
-      value: custom-agent
-    template: scaledobject.yaml
-  - equal:
-      path: metadata.name
-      value: custom-agent
-    template: deployment.yaml
-  - equal:
-      path: spec.scaleTargetRef.name
-      value: custom-agent
-    template: scaledobject.yaml
-- it: keep custom scaler name with Deployment fullname override
-  set:
-    autoscaling.scaledObject.name: custom-scaler
-    fullnameOverride: custom-agent
-  asserts:
-  - equal:
-      path: metadata.name
-      value: custom-scaler
-    template: scaledobject.yaml
-  - equal:
-      path: metadata.name
-      value: custom-agent
-    template: deployment.yaml
-  - equal:
-      path: spec.scaleTargetRef.name
-      value: custom-agent
-    template: scaledobject.yaml
 - it: keep fixed replicas when autoscaling is disabled
   set:
     autoscaling.enabled: false
-    autoscaling.scaledObject.name: unused
     autoscaling.privateLocationSlugName: ''
     autoscaling.prometheus.serverAddress: ''
     replicaCount: 4
@@ -148,7 +94,6 @@ tests:
 - it: omit external scaler without Prometheus settings
   set:
     autoscaling.scaledObject.create: false
-    autoscaling.scaledObject.name: external
     autoscaling.privateLocationSlugName: ''
     autoscaling.prometheus.serverAddress: ''
     replicaCount: 4
