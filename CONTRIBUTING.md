@@ -22,6 +22,19 @@ You can discover reported bugs, feature ideas, or discussion topics in the [Issu
 
 You can reach us anytime at support@checklyhq.com or join our [Community Slack](https://join.slack.com/t/checklycommunity/shared_invite/zt-2qc51mpyr-5idwVD4R4izkf5FC4CFk1A).
 
+## Test chart changes
+
+Install Helm 3.22.0. Run from the repository root:
+
+```sh
+helm plugin install https://github.com/helm-unittest/helm-unittest.git --version v1.2.1
+helm lint charts/agent
+helm unittest --strict charts/agent
+```
+
+CI runs lint and helm-unittest on every pull request. Tests in
+`charts/agent/tests/` check rendered YAML fields and resource references.
+
 ## Legal
 
 By contributing, you confirm that you have the rights to your work and agree to license it under the [APACHE LICENSE, VERSION 2.0](LICENSE).

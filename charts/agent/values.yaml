@@ -17,6 +17,11 @@ autoscaling:
     create: true
   minReplicaCount: 2
   maxReplicaCount: 10
+  # Optional KEDA fallback when metric queries fail. Both fields are required when set.
+  # fallback:
+  #   failureThreshold: 3
+  #   replicas: 1
+  fallback: {}
   # How often KEDA checks the trigger (KEDA default: 30). The metric is aggregated over ~1 minute.
   pollingInterval:
   # Slug of the private location, used to build the default query
