@@ -16,6 +16,10 @@ spec:
   {{- end }}
   minReplicaCount: {{ .Values.autoscaling.minReplicaCount }}
   maxReplicaCount: {{ .Values.autoscaling.maxReplicaCount }}
+  {{- with .Values.autoscaling.fallback }}
+  fallback:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   {{- with .Values.autoscaling.behavior }}
   advanced:
     horizontalPodAutoscalerConfig:

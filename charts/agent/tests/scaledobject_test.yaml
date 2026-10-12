@@ -52,6 +52,9 @@ tests:
   - notExists:
       path: spec.pollingInterval
     template: scaledobject.yaml
+  - notExists:
+      path: spec.fallback
+    template: scaledobject.yaml
   - equal:
       path: spec.triggers
       value:
@@ -80,6 +83,9 @@ tests:
 - it: keep fixed replicas when autoscaling is disabled
   set:
     autoscaling.enabled: false
+    autoscaling.fallback:
+      failureThreshold: 3
+      replicas: 1
     autoscaling.privateLocationSlugName: ''
     autoscaling.prometheus.serverAddress: ''
     replicaCount: 4
@@ -94,6 +100,9 @@ tests:
 - it: omit external scaler without Prometheus settings
   set:
     autoscaling.scaledObject.create: false
+    autoscaling.fallback:
+      failureThreshold: 3
+      replicas: 1
     autoscaling.privateLocationSlugName: ''
     autoscaling.prometheus.serverAddress: ''
     replicaCount: 4
@@ -104,6 +113,42 @@ tests:
   - notExists:
       path: spec.replicas
     template: deployment.yaml
+- it: render infra fallback settings under spec
+  set:
+    autoscaling.fallback:
+      failureThreshold: 3
+      replicas: 1
+  asserts:
+  - equal:
+      path: spec.fallback
+      value:
+        failureThreshold: 3
+        replicas: 1
+    template: scaledobject.yaml
+  - notExists:
+      path: spec.replicas
+    template: deployment.yaml
+- it: keep custom fallback settings
+  set:
+    autoscaling.fallback:
+      failureThreshold: 5
+      replicas: 4
+      behavior: currentReplicasIfHigher
+  asserts:
+  - equal:
+      path: spec.fallback
+      value:
+        failureThreshold: 5
+        replicas: 4
+        behavior: currentReplicasIfHigher
+    template: scaledobject.yaml
+- it: omit null fallback settings
+  set:
+    autoscaling.fallback: null
+  asserts:
+  - notExists:
+      path: spec.fallback
+    template: scaledobject.yaml
 - it: set replica limits and polling interval
   set:
     autoscaling.minReplicaCount: 0

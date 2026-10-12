@@ -73,6 +73,19 @@ When autoscaling is enabled:
 
 Use `autoscaling.query` to override the default query. See [values.yaml](values.yaml) for all options.
 
+Set `autoscaling.fallback` to keep a fallback replica count when metric queries
+fail. Set both `failureThreshold` and `replicas`:
+
+```yaml
+autoscaling:
+  fallback:
+    failureThreshold: 3
+    replicas: 1
+```
+
+Fallback is omitted by default. It applies only when the chart creates the
+ScaledObject. See the [KEDA fallback reference](https://keda.sh/docs/2.18/reference/scaledobject-spec/#fallback).
+
 If your Prometheus server requires authentication, reference a KEDA `TriggerAuthentication` with `autoscaling.prometheus.authenticationRef` and set the authentication mode with `autoscaling.prometheus.metadata.authModes`:
 
 ```

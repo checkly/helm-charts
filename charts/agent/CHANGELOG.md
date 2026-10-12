@@ -2,6 +2,10 @@
 
 ## 0.9.0
 
+### Added
+
+- Add optional `autoscaling.fallback` settings to the KEDA ScaledObject.
+
 ### Upgrade note
 
 This release changes PodDisruptionBudget rendering: zero limits are now kept.
