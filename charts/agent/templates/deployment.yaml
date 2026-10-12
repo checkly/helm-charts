@@ -6,7 +6,9 @@ metadata:
   labels:
     {{- include "agent.labels" . | nindent 4 }}
 spec:
+  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "agent.selectorLabels" . | nindent 6 }}
@@ -40,7 +42,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       shareProcessNamespace: false
-      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds | default 300 }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds | default 330 }}
       containers:
         - name: {{ .Chart.Name }}
           {{- with .Values.securityContext }}

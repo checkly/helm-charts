@@ -44,6 +44,65 @@ resource "helm_release" "checkly_agent" {
 }
 ```
 
+## Autoscaling with KEDA
+
+The chart can create a [KEDA](https://keda.sh) `ScaledObject` that scales the agents based on the number of queued and in-flight check runs, as described in the [autoscaling documentation](https://www.checklyhq.com/docs/platform/private-locations/autoscaling/).
+
+Prerequisites:
+
+- KEDA installed in the cluster
+- Prometheus V2 metrics ingestion enabled, with the `checkly_private_location_check_runs` metric available in a Prometheus-compatible server
+
+```
+env:
+  JOB_CONCURRENCY: 5
+
+autoscaling:
+  enabled: true
+  minReplicaCount: 2
+  maxReplicaCount: 10
+  privateLocationSlugName: my-private-location
+  prometheus:
+    serverAddress: http://prometheus-k8s.monitoring.svc.cluster.local:9090
+```
+
+When autoscaling is enabled:
+
+- `spec.replicas` is not set on the Deployment, so the replica count is owned by the HPA managed by KEDA and `replicaCount` is ignored. This avoids conflicts between Helm and the HPA, for instance with server-side apply.
+- The scaling threshold defaults to `env.JOB_CONCURRENCY` (or `1`), as recommended. It can be overridden with `autoscaling.threshold`.
+
+Use `autoscaling.query` to override the default query. See [values.yaml](values.yaml) for all options.
+
+If your Prometheus server requires authentication, reference a KEDA `TriggerAuthentication` with `autoscaling.prometheus.authenticationRef` and set the authentication mode with `autoscaling.prometheus.metadata.authModes`:
+
+```
+autoscaling:
+  prometheus:
+    authenticationRef:
+      name: keda-prometheus-auth
+    metadata:
+      authModes: basic
+```
+
+`autoscaling.prometheus.metadata` accepts any other parameter of the [KEDA Prometheus scaler](https://keda.sh/docs/latest/scalers/prometheus/), for instance `unsafeSsl` or `customHeaders`.
+
+### Enabling autoscaling on an existing release
+
+The first upgrade that enables autoscaling removes `spec.replicas` from the Deployment. Kubernetes can then reset the replica count to its default of `1`. The HPA scales back up to `autoscaling.minReplicaCount` at once, but above that it only adds one pod per minute with the default `autoscaling.behavior`.
+
+To keep the capacity drop short, set `autoscaling.minReplicaCount` to at least your current replica count for that upgrade, and lower it in a later upgrade.
+
+### Using your own ScaledObject or HPA
+
+If you already manage a `ScaledObject` or an HPA for the agent Deployment, set `autoscaling.scaledObject.create` to `false`. The chart then leaves `spec.replicas` unset and does not create a `ScaledObject`:
+
+```
+autoscaling:
+  enabled: true
+  scaledObject:
+    create: false
+```
+
 ## Alternative ways to set the agent API Key
 
 Instead of setting `apiKeySecret.apiKey` you can also choose an existing secret with the following options

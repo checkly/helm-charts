@@ -1,0 +1,43 @@
+{{- if and .Values.autoscaling.enabled .Values.autoscaling.scaledObject.create -}}
+{{- $slug := .Values.autoscaling.privateLocationSlugName -}}
+{{- $threshold := .Values.autoscaling.threshold | default (.Values.env | default dict).JOB_CONCURRENCY | default 1 -}}
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ include "agent.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "agent.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    name: {{ include "agent.fullname" . }}
+  {{- with .Values.autoscaling.pollingInterval }}
+  pollingInterval: {{ . }}
+  {{- end }}
+  minReplicaCount: {{ .Values.autoscaling.minReplicaCount }}
+  maxReplicaCount: {{ .Values.autoscaling.maxReplicaCount }}
+  {{- with .Values.autoscaling.behavior }}
+  advanced:
+    horizontalPodAutoscalerConfig:
+      behavior:
+        {{- toYaml . | nindent 8 }}
+  {{- end }}
+  triggers:
+    - type: prometheus
+      metadata:
+        serverAddress: {{ required "autoscaling.prometheus.serverAddress is required when autoscaling is enabled" .Values.autoscaling.prometheus.serverAddress | quote }}
+        metricName: checkly_private_location_check_runs
+        threshold: {{ tpl (print $threshold) . | quote }}
+        {{- if .Values.autoscaling.query }}
+        query: {{ tpl .Values.autoscaling.query . | quote }}
+        {{- else }}
+        query: {{ printf "sum(checkly_private_location_check_runs{state=~\"queued|inflight\", private_location_slug_name=\"%s\"})" (required "autoscaling.privateLocationSlugName is required when autoscaling is enabled" $slug) | quote }}
+        {{- end }}
+        {{- range $key, $value := .Values.autoscaling.prometheus.metadata }}
+        {{ $key }}: {{ $value | quote }}
+        {{- end }}
+      {{- with .Values.autoscaling.prometheus.authenticationRef }}
+      authenticationRef:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}
