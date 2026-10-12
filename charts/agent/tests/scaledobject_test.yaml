@@ -1,0 +1,301 @@
+suite: ScaledObject
+templates:
+- deployment.yaml
+- scaledobject.yaml
+release:
+  name: ci-agent
+  namespace: checkly-agent
+set:
+  autoscaling.enabled: true
+  autoscaling.privateLocationSlugName: test-location
+  autoscaling.prometheus.serverAddress: http://prometheus:9090
+tests:
+- it: render default scaler and omit Deployment replicas
+  asserts:
+  - hasDocuments:
+      count: 1
+    template: scaledobject.yaml
+  - isKind:
+      of: ScaledObject
+    template: scaledobject.yaml
+  - isAPIVersion:
+      of: keda.sh/v1alpha1
+    template: scaledobject.yaml
+  - equal:
+      path: metadata.name
+      value: ci-agent
+    template: scaledobject.yaml
+  - equal:
+      path: metadata.namespace
+      value: checkly-agent
+    template: scaledobject.yaml
+  - equal:
+      path: metadata.name
+      value: ci-agent
+    template: deployment.yaml
+  - notExists:
+      path: spec.replicas
+    template: deployment.yaml
+  - equal:
+      path: spec.scaleTargetRef
+      value:
+        name: ci-agent
+    template: scaledobject.yaml
+  - equal:
+      path: spec.minReplicaCount
+      value: 2
+    template: scaledobject.yaml
+  - equal:
+      path: spec.maxReplicaCount
+      value: 10
+    template: scaledobject.yaml
+  - notExists:
+      path: spec.pollingInterval
+    template: scaledobject.yaml
+  - equal:
+      path: spec.triggers
+      value:
+      - type: prometheus
+        metadata:
+          serverAddress: http://prometheus:9090
+          metricName: checkly_private_location_check_runs
+          threshold: '1'
+          query: sum(checkly_private_location_check_runs{state=~"queued|inflight", private_location_slug_name="test-location"})
+    template: scaledobject.yaml
+  - equal:
+      path: spec.advanced.horizontalPodAutoscalerConfig.behavior
+      value:
+        scaleUp:
+          policies:
+          - type: Pods
+            value: 1
+            periodSeconds: 60
+        scaleDown:
+          selectPolicy: Min
+          policies:
+          - type: Pods
+            value: 1
+            periodSeconds: 60
+    template: scaledobject.yaml
+- it: override scaler name and keep Deployment target
+  set:
+    autoscaling.scaledObject.name: ci-agent-scaler
+  asserts:
+  - equal:
+      path: metadata.name
+      value: ci-agent-scaler
+    template: scaledobject.yaml
+  - equal:
+      path: metadata.name
+      value: ci-agent
+    template: deployment.yaml
+  - equal:
+      path: spec.scaleTargetRef.name
+      value: ci-agent
+    template: scaledobject.yaml
+  - notExists:
+      path: spec.replicas
+    template: deployment.yaml
+- it: use Deployment name for empty scaler name
+  set:
+    autoscaling.scaledObject.name: ''
+    fullnameOverride: custom-agent
+  asserts:
+  - equal:
+      path: metadata.name
+      value: custom-agent
+    template: scaledobject.yaml
+  - equal:
+      path: metadata.name
+      value: custom-agent
+    template: deployment.yaml
+  - equal:
+      path: spec.scaleTargetRef.name
+      value: custom-agent
+    template: scaledobject.yaml
+- it: keep custom scaler name with Deployment fullname override
+  set:
+    autoscaling.scaledObject.name: custom-scaler
+    fullnameOverride: custom-agent
+  asserts:
+  - equal:
+      path: metadata.name
+      value: custom-scaler
+    template: scaledobject.yaml
+  - equal:
+      path: metadata.name
+      value: custom-agent
+    template: deployment.yaml
+  - equal:
+      path: spec.scaleTargetRef.name
+      value: custom-agent
+    template: scaledobject.yaml
+- it: keep fixed replicas when autoscaling is disabled
+  set:
+    autoscaling.enabled: false
+    autoscaling.scaledObject.name: unused
+    autoscaling.privateLocationSlugName: ''
+    autoscaling.prometheus.serverAddress: ''
+    replicaCount: 4
+  asserts:
+  - hasDocuments:
+      count: 0
+    template: scaledobject.yaml
+  - equal:
+      path: spec.replicas
+      value: 4
+    template: deployment.yaml
+- it: omit external scaler without Prometheus settings
+  set:
+    autoscaling.scaledObject.create: false
+    autoscaling.scaledObject.name: external
+    autoscaling.privateLocationSlugName: ''
+    autoscaling.prometheus.serverAddress: ''
+    replicaCount: 4
+  asserts:
+  - hasDocuments:
+      count: 0
+    template: scaledobject.yaml
+  - notExists:
+      path: spec.replicas
+    template: deployment.yaml
+- it: set replica limits and polling interval
+  set:
+    autoscaling.minReplicaCount: 0
+    autoscaling.maxReplicaCount: 20
+    autoscaling.pollingInterval: 15
+  asserts:
+  - equal:
+      path: spec.minReplicaCount
+      value: 0
+    template: scaledobject.yaml
+  - equal:
+      path: spec.maxReplicaCount
+      value: 20
+    template: scaledobject.yaml
+  - equal:
+      path: spec.pollingInterval
+      value: 15
+    template: scaledobject.yaml
+- it: use default threshold
+  set:
+    autoscaling.threshold: ''
+  asserts:
+  - equal:
+      path: spec.triggers[0].metadata.threshold
+      value: '1'
+    template: scaledobject.yaml
+- it: use job concurrency as threshold
+  set:
+    autoscaling.threshold: ''
+    env.JOB_CONCURRENCY: 8
+  asserts:
+  - equal:
+      path: spec.triggers[0].metadata.threshold
+      value: '8'
+    template: scaledobject.yaml
+- it: use explicit threshold before concurrency
+  set:
+    autoscaling.threshold: 3
+    env.JOB_CONCURRENCY: 8
+  asserts:
+  - equal:
+      path: spec.triggers[0].metadata.threshold
+      value: '3'
+    template: scaledobject.yaml
+- it: keep fractional threshold as string
+  set:
+    autoscaling.threshold: '2.5'
+    env.JOB_CONCURRENCY: 8
+  asserts:
+  - equal:
+      path: spec.triggers[0].metadata.threshold
+      value: '2.5'
+    template: scaledobject.yaml
+- it: render query and threshold templates without a location slug
+  set:
+    autoscaling.privateLocationSlugName: ''
+    autoscaling.query: sum(check_runs{namespace="{{ .Release.Namespace }}",location="{{ .Values.env.LOCATION
+      }}"})
+    autoscaling.threshold: '{{ .Values.env.JOB_CONCURRENCY }}'
+    env.JOB_CONCURRENCY: 6
+    env.LOCATION: custom
+  asserts:
+  - equal:
+      path: spec.triggers[0].metadata.threshold
+      value: '6'
+    template: scaledobject.yaml
+  - equal:
+      path: spec.triggers[0].metadata.query
+      value: sum(check_runs{namespace="checkly-agent",location="custom"})
+    template: scaledobject.yaml
+- it: place authentication on the trigger and stringify extra metadata
+  set:
+    autoscaling.prometheus.serverAddress: https://prometheus:9090
+    autoscaling.prometheus.authenticationRef:
+      name: prometheus-auth
+      kind: ClusterTriggerAuthentication
+    autoscaling.prometheus.metadata:
+      authModes: basic
+      unsafeSsl: true
+      activationThreshold: 2
+  asserts:
+  - equal:
+      path: spec.triggers[0].authenticationRef
+      value:
+        name: prometheus-auth
+        kind: ClusterTriggerAuthentication
+    template: scaledobject.yaml
+  - equal:
+      path: spec.triggers[0].metadata.serverAddress
+      value: https://prometheus:9090
+    template: scaledobject.yaml
+  - equal:
+      path: spec.triggers[0].metadata.authModes
+      value: basic
+    template: scaledobject.yaml
+  - equal:
+      path: spec.triggers[0].metadata.unsafeSsl
+      value: 'true'
+    template: scaledobject.yaml
+  - equal:
+      path: spec.triggers[0].metadata.activationThreshold
+      value: '2'
+    template: scaledobject.yaml
+- it: set custom HPA behavior
+  set:
+    autoscaling.behavior.scaleDown.stabilizationWindowSeconds: 120
+  asserts:
+  - equal:
+      path: spec.advanced.horizontalPodAutoscalerConfig.behavior.scaleDown.stabilizationWindowSeconds
+      value: 120
+    template: scaledobject.yaml
+- it: omit advanced settings for null behavior
+  set:
+    autoscaling.behavior: null
+  asserts:
+  - notExists:
+      path: spec.advanced
+    template: scaledobject.yaml
+- it: require Prometheus address
+  set:
+    autoscaling.prometheus.serverAddress: ''
+  asserts:
+  - failedTemplate:
+      errorMessage: autoscaling.prometheus.serverAddress is required when autoscaling is enabled
+    template: scaledobject.yaml
+- it: require Prometheus address with custom query
+  set:
+    autoscaling.prometheus.serverAddress: ''
+    autoscaling.query: sum(custom_metric)
+  asserts:
+  - failedTemplate:
+      errorMessage: autoscaling.prometheus.serverAddress is required when autoscaling is enabled
+    template: scaledobject.yaml
+- it: require slug for the default query
+  set:
+    autoscaling.privateLocationSlugName: ''
+  asserts:
+  - failedTemplate:
+      errorMessage: autoscaling.privateLocationSlugName is required when autoscaling is enabled
+    template: scaledobject.yaml

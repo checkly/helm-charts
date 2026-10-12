@@ -1,0 +1,268 @@
+suite: Deployment
+templates:
+- deployment.yaml
+release:
+  name: ci-agent
+  namespace: checkly-agent
+tests:
+- it: render Deployment defaults
+  chart:
+    appVersion: test-version
+  asserts:
+  - hasDocuments:
+      count: 1
+  - isKind:
+      of: Deployment
+  - isAPIVersion:
+      of: apps/v1
+  - equal:
+      path: spec.replicas
+      value: 1
+  - equal:
+      path: spec.strategy
+      value:
+        type: RollingUpdate
+        rollingUpdate:
+          maxSurge: 10%
+          maxUnavailable: 0
+  - equal:
+      path: spec.template.spec.terminationGracePeriodSeconds
+      value: 330
+  - equal:
+      path: spec.template.spec.shareProcessNamespace
+      value: false
+  - equal:
+      path: spec.template.spec.containers[0].image
+      value: docker.io/checkly/agent:test-version
+  - equal:
+      path: spec.template.spec.containers[0].imagePullPolicy
+      value: IfNotPresent
+  - equal:
+      path: spec.template.spec.containers[0].ports
+      value:
+      - name: metrics
+        containerPort: 8080
+  - notExists:
+      path: spec.template.spec.containers[0].livenessProbe
+  - notExists:
+      path: spec.template.spec.containers[0].readinessProbe
+  - notExists:
+      path: spec.template.spec.containers[0].resources
+  - notExists:
+      path: spec.template.spec.containers[0].volumeMounts
+  - notExists:
+      path: spec.template.spec.containers[0].securityContext
+  - notExists:
+      path: spec.template.spec.volumes
+  - notExists:
+      path: spec.template.spec.imagePullSecrets
+  - notExists:
+      path: spec.template.spec.securityContext
+  - notExists:
+      path: spec.template.spec.nodeSelector
+  - notExists:
+      path: spec.template.spec.affinity
+  - notExists:
+      path: spec.template.spec.tolerations
+  - notExists:
+      path: spec.template.spec.topologySpreadConstraints
+- it: set image metrics strategy and grace period
+  set:
+    image.repository: registry.example/agent
+    image.tag: test
+    image.pullPolicy: Always
+    metrics.port: 9090
+    strategy:
+      type: Recreate
+    terminationGracePeriodSeconds: 600
+  asserts:
+  - equal:
+      path: spec.template.spec.containers[0].image
+      value: registry.example/agent:test
+  - equal:
+      path: spec.template.spec.containers[0].imagePullPolicy
+      value: Always
+  - equal:
+      path: spec.template.spec.containers[0].ports
+      value:
+      - name: metrics
+        containerPort: 9090
+  - equal:
+      path: spec.strategy
+      value:
+        type: Recreate
+  - equal:
+      path: spec.template.spec.terminationGracePeriodSeconds
+      value: 600
+- it: render environment values and templates as strings
+  set:
+    env:
+      COUNT: 5
+      ENABLED: true
+      LOCATION: '{{ .Release.Namespace }}'
+      '{{ .Release.Name | upper | replace "-" "_" }}': '{{ .Chart.Name }}'
+  asserts:
+  - equal:
+      path: spec.template.spec.containers[0].env
+      value:
+      - name: COUNT
+        value: '5'
+      - name: ENABLED
+        value: 'true'
+      - name: LOCATION
+        value: checkly-agent
+      - name: CI_AGENT
+        value: agent
+      - name: API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: ci-agent-auth
+            key: apiKey
+- it: add pod metadata without changing selectors
+  set:
+    podAnnotations:
+      example.com/config: test
+    podLabels:
+      team: platform
+  asserts:
+  - equal:
+      path: spec.template.metadata.annotations
+      value:
+        example.com/config: test
+  - equal:
+      path: spec.template.metadata.labels.team
+      value: platform
+  - notExists:
+      path: spec.selector.matchLabels.team
+- it: place container options under the container
+  set:
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 10001
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        memory: 256Mi
+    livenessProbe:
+      httpGet:
+        path: /health
+        port: metrics
+      initialDelaySeconds: 10
+    readinessProbe:
+      tcpSocket:
+        port: metrics
+    volumeMounts:
+    - name: config
+      mountPath: /etc/config
+      readOnly: true
+  asserts:
+  - equal:
+      path: spec.template.spec.containers[0].securityContext
+      value:
+        runAsNonRoot: true
+        runAsUser: 10001
+  - equal:
+      path: spec.template.spec.containers[0].resources
+      value:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          memory: 256Mi
+  - equal:
+      path: spec.template.spec.containers[0].livenessProbe
+      value:
+        httpGet:
+          path: /health
+          port: metrics
+        initialDelaySeconds: 10
+  - equal:
+      path: spec.template.spec.containers[0].readinessProbe
+      value:
+        tcpSocket:
+          port: metrics
+  - equal:
+      path: spec.template.spec.containers[0].volumeMounts
+      value:
+      - name: config
+        mountPath: /etc/config
+        readOnly: true
+- it: place scheduling and security options under the pod
+  set:
+    imagePullSecrets:
+    - name: registry-auth
+    podSecurityContext:
+      fsGroup: 2000
+    volumes:
+    - name: config
+      secret:
+        secretName: agent-config
+    nodeSelector:
+      kubernetes.io/os: linux
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: pool
+              operator: In
+              values:
+              - agents
+    tolerations:
+    - key: agent
+      operator: Exists
+      effect: NoSchedule
+    topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/name: agent
+  asserts:
+  - equal:
+      path: spec.template.spec.imagePullSecrets
+      value:
+      - name: registry-auth
+  - equal:
+      path: spec.template.spec.securityContext
+      value:
+        fsGroup: 2000
+  - equal:
+      path: spec.template.spec.volumes
+      value:
+      - name: config
+        secret:
+          secretName: agent-config
+  - equal:
+      path: spec.template.spec.nodeSelector
+      value:
+        kubernetes.io/os: linux
+  - equal:
+      path: spec.template.spec.affinity
+      value:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: pool
+                operator: In
+                values:
+                - agents
+  - equal:
+      path: spec.template.spec.tolerations
+      value:
+      - key: agent
+        operator: Exists
+        effect: NoSchedule
+  - equal:
+      path: spec.template.spec.topologySpreadConstraints
+      value:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: agent

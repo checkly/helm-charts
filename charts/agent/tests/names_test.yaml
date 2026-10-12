@@ -1,0 +1,246 @@
+suite: Resource names labels and selectors
+templates:
+- deployment.yaml
+- scaledobject.yaml
+- poddisruptionbudget.yaml
+release:
+  name: ci-agent
+  namespace: checkly-agent
+set:
+  autoscaling.enabled: true
+  autoscaling.privateLocationSlugName: test-location
+  autoscaling.prometheus.serverAddress: http://prometheus:9090
+  podDisruptionBudget.enabled: true
+  podDisruptionBudget.minAvailable: 1
+chart:
+  version: 1.2.3
+  appVersion: 9.9.9
+tests:
+- it: use release name when it contains chart name
+  set: {}
+  release:
+    name: ci-agent
+    namespace: checkly-agent
+  asserts:
+  - equal:
+      path: metadata.name
+      value: ci-agent
+  - equal:
+      path: metadata.namespace
+      value: checkly-agent
+  - equal:
+      path: metadata.labels
+      value:
+        helm.sh/chart: agent-1.2.3
+        app.kubernetes.io/name: agent
+        app.kubernetes.io/instance: ci-agent
+        app.kubernetes.io/version: 9.9.9
+        app.kubernetes.io/managed-by: Helm
+  - equal:
+      path: spec.selector.matchLabels
+      value:
+        app.kubernetes.io/name: agent
+        app.kubernetes.io/instance: ci-agent
+    template: deployment.yaml
+  - equal:
+      path: spec.selector.matchLabels
+      value:
+        app.kubernetes.io/name: agent
+        app.kubernetes.io/instance: ci-agent
+    template: poddisruptionbudget.yaml
+  - equal:
+      path: spec.template.metadata.labels
+      value:
+        helm.sh/chart: agent-1.2.3
+        app.kubernetes.io/name: agent
+        app.kubernetes.io/instance: ci-agent
+        app.kubernetes.io/version: 9.9.9
+        app.kubernetes.io/managed-by: Helm
+    template: deployment.yaml
+  - equal:
+      path: spec.scaleTargetRef.name
+      value: ci-agent
+    template: scaledobject.yaml
+- it: add chart name to release name
+  set: {}
+  release:
+    name: ci
+    namespace: checkly-agent
+  asserts:
+  - equal:
+      path: metadata.name
+      value: ci-agent
+  - equal:
+      path: metadata.namespace
+      value: checkly-agent
+  - equal:
+      path: metadata.labels
+      value:
+        helm.sh/chart: agent-1.2.3
+        app.kubernetes.io/name: agent
+        app.kubernetes.io/instance: ci
+        app.kubernetes.io/version: 9.9.9
+        app.kubernetes.io/managed-by: Helm
+  - equal:
+      path: spec.selector.matchLabels
+      value:
+        app.kubernetes.io/name: agent
+        app.kubernetes.io/instance: ci
+    template: deployment.yaml
+  - equal:
+      path: spec.selector.matchLabels
+      value:
+        app.kubernetes.io/name: agent
+        app.kubernetes.io/instance: ci
+    template: poddisruptionbudget.yaml
+  - equal:
+      path: spec.template.metadata.labels
+      value:
+        helm.sh/chart: agent-1.2.3
+        app.kubernetes.io/name: agent
+        app.kubernetes.io/instance: ci
+        app.kubernetes.io/version: 9.9.9
+        app.kubernetes.io/managed-by: Helm
+    template: deployment.yaml
+  - equal:
+      path: spec.scaleTargetRef.name
+      value: ci-agent
+    template: scaledobject.yaml
+- it: use name override
+  set:
+    nameOverride: worker
+  release:
+    name: ci
+    namespace: checkly-agent
+  asserts:
+  - equal:
+      path: metadata.name
+      value: ci-worker
+  - equal:
+      path: metadata.namespace
+      value: checkly-agent
+  - equal:
+      path: metadata.labels
+      value:
+        helm.sh/chart: agent-1.2.3
+        app.kubernetes.io/name: worker
+        app.kubernetes.io/instance: ci
+        app.kubernetes.io/version: 9.9.9
+        app.kubernetes.io/managed-by: Helm
+  - equal:
+      path: spec.selector.matchLabels
+      value:
+        app.kubernetes.io/name: worker
+        app.kubernetes.io/instance: ci
+    template: deployment.yaml
+  - equal:
+      path: spec.selector.matchLabels
+      value:
+        app.kubernetes.io/name: worker
+        app.kubernetes.io/instance: ci
+    template: poddisruptionbudget.yaml
+  - equal:
+      path: spec.template.metadata.labels
+      value:
+        helm.sh/chart: agent-1.2.3
+        app.kubernetes.io/name: worker
+        app.kubernetes.io/instance: ci
+        app.kubernetes.io/version: 9.9.9
+        app.kubernetes.io/managed-by: Helm
+    template: deployment.yaml
+  - equal:
+      path: spec.scaleTargetRef.name
+      value: ci-worker
+    template: scaledobject.yaml
+- it: use fullname override
+  set:
+    fullnameOverride: custom-agent
+  release:
+    name: ci
+    namespace: checkly-agent
+  asserts:
+  - equal:
+      path: metadata.name
+      value: custom-agent
+  - equal:
+      path: metadata.namespace
+      value: checkly-agent
+  - equal:
+      path: metadata.labels
+      value:
+        helm.sh/chart: agent-1.2.3
+        app.kubernetes.io/name: agent
+        app.kubernetes.io/instance: ci
+        app.kubernetes.io/version: 9.9.9
+        app.kubernetes.io/managed-by: Helm
+  - equal:
+      path: spec.selector.matchLabels
+      value:
+        app.kubernetes.io/name: agent
+        app.kubernetes.io/instance: ci
+    template: deployment.yaml
+  - equal:
+      path: spec.selector.matchLabels
+      value:
+        app.kubernetes.io/name: agent
+        app.kubernetes.io/instance: ci
+    template: poddisruptionbudget.yaml
+  - equal:
+      path: spec.template.metadata.labels
+      value:
+        helm.sh/chart: agent-1.2.3
+        app.kubernetes.io/name: agent
+        app.kubernetes.io/instance: ci
+        app.kubernetes.io/version: 9.9.9
+        app.kubernetes.io/managed-by: Helm
+    template: deployment.yaml
+  - equal:
+      path: spec.scaleTargetRef.name
+      value: custom-agent
+    template: scaledobject.yaml
+- it: truncate fullname and remove trailing hyphen
+  set:
+    fullnameOverride: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-suffix
+  release:
+    name: ci
+    namespace: checkly-agent
+  asserts:
+  - equal:
+      path: metadata.name
+      value: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  - equal:
+      path: metadata.namespace
+      value: checkly-agent
+  - equal:
+      path: metadata.labels
+      value:
+        helm.sh/chart: agent-1.2.3
+        app.kubernetes.io/name: agent
+        app.kubernetes.io/instance: ci
+        app.kubernetes.io/version: 9.9.9
+        app.kubernetes.io/managed-by: Helm
+  - equal:
+      path: spec.selector.matchLabels
+      value:
+        app.kubernetes.io/name: agent
+        app.kubernetes.io/instance: ci
+    template: deployment.yaml
+  - equal:
+      path: spec.selector.matchLabels
+      value:
+        app.kubernetes.io/name: agent
+        app.kubernetes.io/instance: ci
+    template: poddisruptionbudget.yaml
+  - equal:
+      path: spec.template.metadata.labels
+      value:
+        helm.sh/chart: agent-1.2.3
+        app.kubernetes.io/name: agent
+        app.kubernetes.io/instance: ci
+        app.kubernetes.io/version: 9.9.9
+        app.kubernetes.io/managed-by: Helm
+    template: deployment.yaml
+  - equal:
+      path: spec.scaleTargetRef.name
+      value: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    template: scaledobject.yaml

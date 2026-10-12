@@ -24,17 +24,16 @@ You can reach us anytime at support@checklyhq.com or join our [Community Slack](
 
 ## Test chart changes
 
-Install Helm 3.22.0 and Python 3.12. Run from the repository root:
+Install Helm 3.22.0. Run from the repository root:
 
 ```sh
-python3 -m venv .venv
-.venv/bin/python -m pip install -r tests/requirements.txt
+helm plugin install https://github.com/helm-unittest/helm-unittest.git --version v1.2.1
 helm lint charts/agent
-.venv/bin/python -m unittest discover -s tests -v
+helm unittest --strict charts/agent
 ```
 
-CI runs lint and render tests on every pull request. Render tests parse YAML,
-reject duplicate keys, and check resource fields and references.
+CI runs lint and helm-unittest on every pull request. Tests in
+`charts/agent/tests/` check rendered YAML fields and resource references.
 
 ## Legal
 
