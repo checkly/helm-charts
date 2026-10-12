@@ -146,3 +146,62 @@ tests:
   - equal:
       path: spec.maxUnavailable
       value: 1
+- it: reject both positive limits
+  set:
+    podDisruptionBudget.enabled: true
+    podDisruptionBudget.minAvailable: 1
+    podDisruptionBudget.maxUnavailable: 1
+  asserts:
+  - failedTemplate:
+      errorMessage: 'podDisruptionBudget: set only one of minAvailable or maxUnavailable'
+- it: reject both limits with zero minimum
+  set:
+    podDisruptionBudget.enabled: true
+    podDisruptionBudget.minAvailable: 0
+    podDisruptionBudget.maxUnavailable: 1
+  asserts:
+  - failedTemplate:
+      errorMessage: 'podDisruptionBudget: set only one of minAvailable or maxUnavailable'
+- it: reject both limits with zero maximum
+  set:
+    podDisruptionBudget.enabled: true
+    podDisruptionBudget.minAvailable: 1
+    podDisruptionBudget.maxUnavailable: 0
+  asserts:
+  - failedTemplate:
+      errorMessage: 'podDisruptionBudget: set only one of minAvailable or maxUnavailable'
+- it: reject both zero limits
+  set:
+    podDisruptionBudget.enabled: true
+    podDisruptionBudget.minAvailable: 0
+    podDisruptionBudget.maxUnavailable: 0
+  asserts:
+  - failedTemplate:
+      errorMessage: 'podDisruptionBudget: set only one of minAvailable or maxUnavailable'
+- it: reject both percentage limits
+  set:
+    podDisruptionBudget.enabled: true
+    podDisruptionBudget.minAvailable: 50%
+    podDisruptionBudget.maxUnavailable: 0%
+  asserts:
+  - failedTemplate:
+      errorMessage: 'podDisruptionBudget: set only one of minAvailable or maxUnavailable'
+- it: keep zero minimum with null maximum
+  set:
+    podDisruptionBudget.enabled: true
+    podDisruptionBudget.minAvailable: 0
+    podDisruptionBudget.maxUnavailable: null
+  asserts:
+  - equal:
+      path: spec.minAvailable
+      value: 0
+  - notExists:
+      path: spec.maxUnavailable
+- it: ignore both limits when budget is disabled
+  set:
+    podDisruptionBudget.enabled: false
+    podDisruptionBudget.minAvailable: 1
+    podDisruptionBudget.maxUnavailable: 0
+  asserts:
+  - hasDocuments:
+      count: 0
