@@ -160,6 +160,31 @@ volumeMounts: []
 #   mountPath: "/etc/foo"
 #   readOnly: true
 
+# Pod DNS settings, e.g. to resolve monitored hostnames with an internal DNS
+# server (split-horizon, private endpoints).
+# https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy
+dnsPolicy: ""
+# - "None" requires dnsConfig.nameservers.
+
+# https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+dnsConfig: {}
+# nameservers:
+#   - 10.0.0.10
+# searches:
+#   - checkly-agent.svc.cluster.local
+#   - svc.cluster.local
+#   - cluster.local
+# options:
+#   - name: ndots
+#     value: "5"
+
+# Static /etc/hosts entries for the agent pods.
+# https://kubernetes.io/docs/tasks/network/customize-hosts-file-for-pods/
+hostAliases: []
+# - ip: 10.0.0.20
+#   hostnames:
+#     - service.internal.example.com
+
 nodeSelector: {}
 
 tolerations: []

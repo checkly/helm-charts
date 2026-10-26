@@ -44,6 +44,28 @@ resource "helm_release" "checkly_agent" {
 }
 ```
 
+## Custom DNS
+
+Checks resolve hostnames with the agent pod's DNS. To monitor endpoints that
+resolve differently inside your network, for example private endpoints served by
+an internal DNS server, set the pod DNS settings:
+
+```yaml
+dnsPolicy: None
+dnsConfig:
+  nameservers:
+    - 10.0.0.10 # internal DNS server (e.g. a CoreDNS Service ClusterIP)
+  searches:
+    - svc.cluster.local
+    - cluster.local
+  options:
+    - name: ndots
+      value: "5"
+```
+
+`dnsPolicy: None` requires `dnsConfig.nameservers`. Use `hostAliases` for a few
+static entries instead of a DNS server.
+
 ## Autoscaling with KEDA
 
 The chart can create a [KEDA](https://keda.sh) `ScaledObject` that scales the agents based on the number of queued and in-flight check runs, as described in the [autoscaling documentation](https://www.checklyhq.com/docs/platform/private-locations/autoscaling/).

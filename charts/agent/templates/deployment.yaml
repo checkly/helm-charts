@@ -42,6 +42,20 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       shareProcessNamespace: false
+      {{- if and (eq (toString .Values.dnsPolicy) "None") (not (.Values.dnsConfig).nameservers) }}
+      {{- fail "dnsPolicy None requires dnsConfig.nameservers" }}
+      {{- end }}
+      {{- with .Values.dnsPolicy }}
+      dnsPolicy: {{ . }}
+      {{- end }}
+      {{- with .Values.dnsConfig }}
+      dnsConfig:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.hostAliases }}
+      hostAliases:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds | default 330 }}
       containers:
         - name: {{ .Chart.Name }}
