@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.10.0
+
+### Added
+
+- Add optional `dnsPolicy`, `dnsConfig` and `hostAliases` pod settings, so checks
+  can resolve hostnames with an internal DNS server.
+
 ## 0.9.0
 
 ### Added
