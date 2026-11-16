@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.10.3
+
+- Update the default agent image to 8.15.0.
+
 ## 0.10.2
 
 - Update the default agent image to 8.14.0.
